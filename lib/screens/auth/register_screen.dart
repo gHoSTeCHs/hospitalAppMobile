@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
 }
@@ -11,6 +13,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _hospitalCodeController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
@@ -49,7 +52,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+            children: <Widget>[
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
@@ -80,6 +83,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   if (!value.contains('@')) {
                     return 'Please enter a valid email';
                   }
+                  return null;
+                },
+              ),
+
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _hospitalCodeController,
+                decoration: InputDecoration(
+                  labelText: 'Hospital Code',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.code),
+                ),
+                keyboardType: TextInputType.text,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter your hospital code";
+                  }
+
                   return null;
                 },
               ),

@@ -6,6 +6,7 @@ import '../models/user.dart';
 
 class AuthService {
   // Update with your Laravel API URL
+  // final String baseUrl = 'http://127.0.0.1:8000/api';
   final String baseUrl = 'http://10.0.2.2:8000/api';
 
   // Store token in shared preferences
@@ -15,6 +16,7 @@ class AuthService {
     await prefs.setInt('userId', user.id);
     await prefs.setString('userName', user.name);
     await prefs.setString('userEmail', user.email);
+    await prefs.setString('hospitalCode', user.hospitalCode);
   }
 
   // Check if user is logged in
@@ -38,7 +40,13 @@ class AuthService {
     final email = prefs.getString('userEmail');
 
     if (token != null && id != null && name != null && email != null) {
-      return User(id: id, name: name, email: email, token: token);
+      return User(
+        id: id,
+        name: name,
+        email: email,
+        token: token,
+        hospitalCode: '',
+      );
     }
     return null;
   }
