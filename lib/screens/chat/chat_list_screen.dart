@@ -53,10 +53,20 @@ class _ChatsScreenState extends State<ChatsScreen> {
   }
 
   void _navigateToChatDetail(BuildContext context, String chatId) {
-    // Navigate to chat detail screen
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => ChatDetailScreen(chatId: chatId)));
+    // Find the chat data for this ID
+    final chat = _chats.firstWhere((c) => c.id == chatId);
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:
+            (_) => ChatDetailScreen(
+              chatId: chatId,
+              name: chat.name,
+              avatarUrl: chat.avatarUrl,
+              isOnline: chat.isOnline,
+            ),
+      ),
+    );
   }
 
   @override
