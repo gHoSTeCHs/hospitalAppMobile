@@ -24,6 +24,10 @@ class ProfileScreen extends StatelessWidget {
             authProvider.user?.name ?? "User",
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
+          Text(
+            authProvider.user?.hospitalCode ?? "User",
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           Text(
             authProvider.user?.email ?? "user@example.com",

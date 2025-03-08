@@ -13,14 +13,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _hospitalCodeController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _hospitalCodeController = TextEditingController();
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _hospitalCodeController.dispose();
     super.dispose();
   }
 
@@ -32,6 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _nameController.text.trim(),
       _emailController.text.trim(),
       _passwordController.text,
+      _hospitalCodeController.text.trim(),
     );
 
     if (success && mounted) {
@@ -89,23 +91,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: 16),
               TextFormField(
-                controller: _hospitalCodeController,
-                decoration: InputDecoration(
-                  labelText: 'Hospital Code',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.code),
-                ),
-                keyboardType: TextInputType.text,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Please enter your hospital code";
-                  }
-
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: 'Password',
@@ -120,6 +105,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   if (value.length < 6) {
                     return 'Password must be at least 6 characters';
                   }
+                  return null;
+                },
+              ),
+
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _hospitalCodeController,
+                decoration: InputDecoration(
+                  labelText: 'Hospital Code',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.code),
+                ),
+                keyboardType: TextInputType.text,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter your hospital code";
+                  }
+
                   return null;
                 },
               ),

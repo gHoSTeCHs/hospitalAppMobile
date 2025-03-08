@@ -52,21 +52,31 @@ class AuthService {
   }
 
   // Register user
-  Future<User> register(String name, String email, String password) async {
+  Future<User> register(
+    String name,
+    String email,
+    String password,
+    String hospitalCode,
+  ) async {
     final response = await http.post(
       Uri.parse('$baseUrl/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({
         'name': name,
         'email': email,
         'password': password,
         'password_confirmation': password,
+        'hospital_code': hospitalCode,
       }),
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final userData = User.fromJson(jsonDecode(response.body));
       await storeUserData(userData);
+      print('Response structure: $userData');
       return userData;
     } else {
       final error = jsonDecode(response.body);
