@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/chat.dart';
+import '../../services/chat_service.dart'; // ChatService for API calls
 import 'chat_details_screen.dart';
 import '../../widgets/chat_filter_chip.dart';
 import '../../widgets/chat_tile.dart';
@@ -14,53 +15,39 @@ class ChatsScreen extends StatefulWidget {
 class _ChatsScreenState extends State<ChatsScreen> {
   String _selectedFilter = "All chats";
   final List<String> _filters = ["All chats", "Personal", "Work", "Groups"];
+  late Future<List<ChatModel>> _chatsFuture;
 
-  // Mock chat data
-  final List<ChatModel> _chats = [
-    ChatModel(
-      id: '2',
-      name: 'Lee Williamson',
-      message: 'Yes, that\'s gonna work, hopefully.',
-      time: '06:12',
-      avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg',
-      unreadCount: 0,
-      isOnline: true,
-    ),
-    ChatModel(
-      id: '3',
-      name: 'Ronald Mccoy',
-      message: '✓✓ Thanks dude 😊',
-      time: 'Yesterday',
-      avatarUrl: 'https://randomuser.me/api/portraits/men/81.jpg',
-      unreadCount: 0,
-      isOnline: false,
-    ),
-    ChatModel(
-      id: '4',
-      name: 'Albert Bell',
-      message: 'I\'m happy this anime has such grea...',
-      time: 'Yesterday',
-      avatarUrl: 'https://randomuser.me/api/portraits/men/17.jpg',
-      unreadCount: 0,
-      isOnline: false,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _chatsFuture = fetchChats(); // Fetch chats when screen loads
+  }
+
+  Future<List<ChatModel>> fetchChats() async {
+    try {
+      final chatService = ChatService();
+      final response = await chatService.getConversations();
+      return response.data
+          .map<ChatModel>((chat) => ChatModel.fromJson(chat))
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
 
   void _handleFilterChange(String filter) {
     setState(() {
       _selectedFilter = filter;
+      _chatsFuture = fetchChats(); // Re-fetch chats on filter change
     });
   }
 
-  void _navigateToChatDetail(BuildContext context, String chatId) {
-    // Find the chat data for this ID
-    final chat = _chats.firstWhere((c) => c.id == chatId);
-
+  void _navigateToChatDetail(BuildContext context, ChatModel chat) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder:
             (_) => ChatDetailScreen(
-              chatId: chatId,
+              chatId: chat.id,
               name: chat.name,
               avatarUrl: chat.avatarUrl,
               isOnline: chat.isOnline,
@@ -95,26 +82,39 @@ class _ChatsScreenState extends State<ChatsScreen> {
 
         // Chat list
         Expanded(
-          child:
-              _chats.isEmpty
-                  ? const Center(child: Text('No chats yet'))
-                  : ListView.builder(
-                    padding: const EdgeInsets.all(8),
-                    itemCount: _chats.length,
-                    itemBuilder: (context, index) {
-                      final chat = _chats[index];
+          child: FutureBuilder<List<ChatModel>>(
+            future: _chatsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError || !snapshot.hasData) {
+                return const Center(child: Text('Failed to load chats'));
+              }
 
-                      return ChatTile(
-                        name: chat.name,
-                        message: chat.message,
-                        time: chat.time,
-                        avatarUrl: chat.avatarUrl,
-                        unreadCount: chat.unreadCount,
-                        isOnline: chat.isOnline,
-                        onTap: () => _navigateToChatDetail(context, chat.id),
-                      );
-                    },
-                  ),
+              final chats = snapshot.data!;
+              if (chats.isEmpty) {
+                return const Center(child: Text('No chats yet'));
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: chats.length,
+                itemBuilder: (context, index) {
+                  final chat = chats[index];
+
+                  return ChatTile(
+                    name: chat.name,
+                    message: chat.message,
+                    time: chat.time,
+                    avatarUrl: chat.avatarUrl,
+                    unreadCount: chat.unreadCount,
+                    isOnline: chat.isOnline,
+                    onTap: () => _navigateToChatDetail(context, chat),
+                  );
+                },
+              );
+            },
+          ),
         ),
       ],
     );

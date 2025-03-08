@@ -16,4 +16,16 @@ class ChatModel {
     required this.unreadCount,
     required this.isOnline,
   });
+
+  factory ChatModel.fromJson(Map<String, dynamic> json) {
+    return ChatModel(
+      id: json['id'].toString(),
+      name: json['name'] ?? 'Unknown',
+      message: json['last_message'] ?? '',
+      time: json['last_message_time'] ?? 'Unknown',
+      avatarUrl: json['avatar_url'] ?? '',
+      unreadCount: json['unread_count'] ?? 0,
+      isOnline: json['is_online'] ?? false,
+    );
+  }
 }

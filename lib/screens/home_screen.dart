@@ -3,14 +3,8 @@ import 'package:flutterapplication/screens/call_screen.dart';
 import 'package:flutterapplication/screens/chat/chat_list_screen.dart';
 import 'package:flutterapplication/screens/profile.dart';
 import 'package:flutterapplication/screens/recent_screen.dart';
-// import 'package:flutterapplication/widgets/chat_tile.dart';
-// import 'package:provider/provider.dart';
-// import '../providers/auth_provider.dart';
-// import '../models/chat.dart';
-
-// Screens for different tabs
-
-// Reusable UI components
+import '../services/chat_service.dart';
+import 'package:flutterapplication/widgets/select_user_dialog.dart';
 
 // Main home screen with navigation
 class HomeScreen extends StatefulWidget {
@@ -22,6 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedTab = 0;
+  final _chatService = ChatService();
 
   // List of all screens for the tabs
   final List<Widget> _screens = [
@@ -56,11 +51,20 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton:
           _selectedTab == 0
               ? FloatingActionButton(
-                onPressed: () {
-                  // Show dialog or navigate to new conversation screen
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Create new conversation')),
+                onPressed: () async {
+                  final selectedUserId = await showDialog<String>(
+                    context: context,
+                    builder: (context) => SelectUserDialog(),
                   );
+
+                  if (selectedUserId != null) {
+                    await _chatService.createConversation('individual', [
+                      int.parse(selectedUserId),
+                    ]);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Conversation started')),
+                    );
+                  }
                 },
                 child: const Icon(Icons.add_comment),
               )

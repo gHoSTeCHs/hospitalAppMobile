@@ -76,7 +76,7 @@ class AuthService {
     if (response.statusCode == 200 || response.statusCode == 201) {
       final userData = User.fromJson(jsonDecode(response.body));
       await storeUserData(userData);
-      print('Response structure: $userData');
+      // print('Response structure: $userData');
       return userData;
     } else {
       final error = jsonDecode(response.body);
