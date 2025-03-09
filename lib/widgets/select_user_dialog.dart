@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
+import 'package:flutterapplication/services/chat_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SelectUserDialog extends StatefulWidget {
   const SelectUserDialog({super.key});
@@ -9,7 +10,7 @@ class SelectUserDialog extends StatefulWidget {
 }
 
 class _SelectUserDialogState extends State<SelectUserDialog> {
-  // final ChatService _chatService = ChatService();
+  final ChatService _chatService = ChatService();
   List<Map<String, dynamic>> _users = [];
   bool _isLoading = true;
 
@@ -20,12 +21,23 @@ class _SelectUserDialogState extends State<SelectUserDialog> {
   }
 
   Future<void> _fetchUsers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final int? userId = prefs.getInt('userId'); // Use hospital_id, not user_id
+
+    if (userId == null) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Hospital ID not found')));
+      return;
+    }
+
     try {
-      final response = await Dio().get(
-        'http://10.0.2.2:8000/api/users',
-      ); // Adjust endpoint
+      final response = await _chatService.getUsersWithSameHospitalId(userId);
+      final List users = response.data['data'] ?? [];
+
       setState(() {
-        _users = List<Map<String, dynamic>>.from(response.data['users']);
+        _users = List<Map<String, dynamic>>.from(users);
         _isLoading = false;
       });
     } catch (e) {
@@ -46,21 +58,32 @@ class _SelectUserDialogState extends State<SelectUserDialog> {
               : SizedBox(
                 width: double.maxFinite,
                 height: 300,
-                child: ListView.builder(
-                  itemCount: _users.length,
-                  itemBuilder: (context, index) {
-                    final user = _users[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(user['avatar_url'] ?? ''),
-                      ),
-                      title: Text(user['name']),
-                      onTap:
-                          () =>
-                              Navigator.of(context).pop(user['id'].toString()),
-                    );
-                  },
-                ),
+                child:
+                    _users.isEmpty
+                        ? const Center(child: Text('No users found'))
+                        : ListView.builder(
+                          itemCount: _users.length,
+                          itemBuilder: (context, index) {
+                            final user = _users[index];
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage:
+                                    user['avatar_url'] != null &&
+                                            user['avatar_url'].isNotEmpty
+                                        ? NetworkImage(user['avatar_url'])
+                                        : const AssetImage(
+                                              'assets/default_avatar.png',
+                                            )
+                                            as ImageProvider, // Use a default avatar
+                              ),
+                              title: Text(user['name']),
+                              onTap:
+                                  () => Navigator.of(
+                                    context,
+                                  ).pop(user['id'].toString()),
+                            );
+                          },
+                        ),
               ),
     );
   }

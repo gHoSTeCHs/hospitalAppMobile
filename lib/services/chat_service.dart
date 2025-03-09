@@ -29,6 +29,16 @@ class ChatService {
     return (await _getToken()) != null;
   }
 
+  Future<Response> getUsersWithSameHospitalId(int? id) async {
+    await _setAuthHeaders();
+    try {
+      Response response = await _dio.get('/users/$id');
+      return response;
+    } catch (e) {
+      throw Exception('Failed to fetch users: $e');
+    }
+  }
+
   Future<Response> getConversations() async {
     await _setAuthHeaders();
     try {

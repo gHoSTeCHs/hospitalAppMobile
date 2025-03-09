@@ -3,7 +3,7 @@ import 'package:flutterapplication/screens/call_screen.dart';
 import 'package:flutterapplication/screens/chat/chat_list_screen.dart';
 import 'package:flutterapplication/screens/profile.dart';
 import 'package:flutterapplication/screens/recent_screen.dart';
-import '../services/chat_service.dart';
+// import '../services/chat_service.dart';
 import 'package:flutterapplication/widgets/select_user_dialog.dart';
 
 // Main home screen with navigation
@@ -16,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedTab = 0;
-  final _chatService = ChatService();
+  // final _chatService = ChatService();
 
   // List of all screens for the tabs
   final List<Widget> _screens = [
@@ -57,14 +57,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     builder: (context) => SelectUserDialog(),
                   );
 
-                  if (selectedUserId != null) {
-                    await _chatService.createConversation('individual', [
-                      int.parse(selectedUserId),
-                    ]);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Conversation started')),
-                    );
-                  }
+                  // if (selectedUserId != null) {
+                  //   await _chatService.createConversation('individual', [
+                  //     int.parse(selectedUserId),
+                  //   ]);
+                  //   ScaffoldMessenger.of(context).showSnackBar(
+                  //     const SnackBar(content: Text('Conversation started')),
+                  //   );
+                  // }
                 },
                 child: const Icon(Icons.add_comment),
               )
