@@ -1,5 +1,5 @@
 class ChatModel {
-  final String id;
+  final int id;
   final String name;
   final String message;
   final String time;
@@ -18,14 +18,28 @@ class ChatModel {
   });
 
   factory ChatModel.fromJson(Map<String, dynamic> json) {
+    // Extract participants
+    List<dynamic> participants = json['participants'] ?? [];
+
+    // Extract participant name and avatar for individual chats
+    String chatName = json['name'] ?? 'Unknown';
+    String avatar = '';
+
+    if (json['type'] == 'individual' && participants.isNotEmpty) {
+      // Get the first participant (excluding current user)
+      final otherParticipant = participants.first;
+      chatName = otherParticipant['name'] ?? 'Unknown';
+      avatar = otherParticipant['avatar_url'] ?? '';
+    }
+
     return ChatModel(
-      id: json['id'].toString(),
-      name: json['name'] ?? 'Unknown',
-      message: json['last_message'] ?? '',
-      time: json['last_message_time'] ?? 'Unknown',
-      avatarUrl: json['avatar_url'] ?? '',
+      id: json['id'],
+      name: chatName,
+      message: json['last_message']?['content'] ?? 'No messages yet',
+      time: json['last_message']?['created_at'] ?? '',
+      avatarUrl: avatar,
       unreadCount: json['unread_count'] ?? 0,
-      isOnline: json['is_online'] ?? false,
+      isOnline: false, // API does not return online status yet
     );
   }
 }

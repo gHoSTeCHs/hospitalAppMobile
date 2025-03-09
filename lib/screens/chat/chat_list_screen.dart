@@ -27,7 +27,9 @@ class _ChatsScreenState extends State<ChatsScreen> {
     try {
       final chatService = ChatService();
       final response = await chatService.getConversations();
-      return response.data
+
+      List<dynamic> conversationList = response.data['conversations'] ?? [];
+      return conversationList
           .map<ChatModel>((chat) => ChatModel.fromJson(chat))
           .toList();
     } catch (e) {

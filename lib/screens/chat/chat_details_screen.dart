@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ChatDetailScreen extends StatefulWidget {
-  final String chatId;
+  final int chatId;
   final String name;
   final String avatarUrl;
   final bool isOnline;

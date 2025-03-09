@@ -57,7 +57,7 @@ class ChatService {
     await _setAuthHeaders();
     try {
       Response response = await _dio.post(
-        '/conversations',
+        '/conversations/create',
         data: {'type': type, 'name': name, 'participants': participants},
       );
       return response;
