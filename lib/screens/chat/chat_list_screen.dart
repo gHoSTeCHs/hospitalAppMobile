@@ -108,7 +108,6 @@ class _ChatsScreenState extends State<ChatsScreen> {
                     name: chat.name,
                     message: chat.message,
                     time: chat.time,
-                    avatarUrl: chat.avatarUrl,
                     unreadCount: chat.unreadCount,
                     isOnline: chat.isOnline,
                     onTap: () => _navigateToChatDetail(context, chat),

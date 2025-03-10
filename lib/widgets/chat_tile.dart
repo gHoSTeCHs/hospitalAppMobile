@@ -4,7 +4,6 @@ class ChatTile extends StatelessWidget {
   final String name;
   final String message;
   final String time;
-  final String avatarUrl;
   final int unreadCount;
   final bool isOnline;
   final VoidCallback onTap;
@@ -14,7 +13,6 @@ class ChatTile extends StatelessWidget {
     required this.name,
     required this.message,
     required this.time,
-    required this.avatarUrl,
     required this.unreadCount,
     required this.isOnline,
     required this.onTap,
@@ -26,7 +24,12 @@ class ChatTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       leading: Stack(
         children: [
-          CircleAvatar(radius: 24, backgroundImage: NetworkImage(avatarUrl)),
+          CircleAvatar(
+            radius: 24,
+            backgroundImage: NetworkImage(
+              'https://randomuser.me/api/portraits/men/32.jpg',
+            ),
+          ),
           if (isOnline)
             Positioned(
               right: 0,

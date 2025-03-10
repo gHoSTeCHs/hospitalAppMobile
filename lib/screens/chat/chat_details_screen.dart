@@ -94,7 +94,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundImage: NetworkImage(widget.avatarUrl),
+                  backgroundImage: NetworkImage(
+                    'https://randomuser.me/api/portraits/men/32.jpg',
+                  ),
                 ),
                 if (widget.isOnline)
                   Positioned(
@@ -267,7 +269,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                 children: [
                   CircleAvatar(
                     radius: 14,
-                    backgroundImage: NetworkImage(widget.avatarUrl),
+                    backgroundImage: NetworkImage(
+                      'https://randomuser.me/api/portraits/men/32.jpg',
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -345,7 +349,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               images.map((url) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.network(url, fit: BoxFit.cover),
+                  child: Image.network(
+                    'https://randomuser.me/api/portraits/men/32.jpg',
+                    fit: BoxFit.cover,
+                  ),
                 );
               }).toList(),
         ),

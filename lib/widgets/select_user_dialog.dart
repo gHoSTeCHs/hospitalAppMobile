@@ -67,14 +67,9 @@ class _SelectUserDialogState extends State<SelectUserDialog> {
                             final user = _users[index];
                             return ListTile(
                               leading: CircleAvatar(
-                                backgroundImage:
-                                    user['avatar_url'] != null &&
-                                            user['avatar_url'].isNotEmpty
-                                        ? NetworkImage(user['avatar_url'])
-                                        : const AssetImage(
-                                              'assets/default_avatar.png',
-                                            )
-                                            as ImageProvider, // Use a default avatar
+                                backgroundImage: NetworkImage(
+                                  'https://randomuser.me/api/portraits/men/32.jpg',
+                                ),
                               ),
                               title: Text(user['name']),
                               onTap:

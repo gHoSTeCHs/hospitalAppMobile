@@ -5,7 +5,6 @@ class User {
   final String token;
   final String hospitalCode;
   final String? profilePicture;
-  final String role;
   final bool isOnline;
   final DateTime? lastActive;
 
@@ -16,7 +15,7 @@ class User {
     required this.token,
     required this.hospitalCode,
     this.profilePicture,
-    required this.role,
+
     required this.isOnline,
     this.lastActive,
     sta,
@@ -24,13 +23,12 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
+      id: json['user']['id'],
+      name: json['user']['name'],
+      email: json['user']['email'],
       token: json['token'],
       hospitalCode: '',
       profilePicture: json['profile_picture'],
-      role: json['role'],
       isOnline: json['is_online'] ?? false,
       lastActive:
           json['last_active'] != null
@@ -46,7 +44,6 @@ class User {
       'hospital_id': hospitalCode,
       'token': token,
       'profile_picture': profilePicture,
-      'role': role,
       'is_online': isOnline,
       'last_active': lastActive?.toIso8601String(),
     };
@@ -68,7 +65,6 @@ class User {
       email: email ?? this.email,
       hospitalCode: this.hospitalCode,
       profilePicture: profilePicture ?? this.profilePicture,
-      role: role ?? this.role,
       isOnline: isOnline ?? this.isOnline,
       lastActive: lastActive ?? this.lastActive,
       token: token,

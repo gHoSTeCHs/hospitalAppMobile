@@ -46,6 +46,7 @@ class AuthService {
         email: email,
         token: token,
         hospitalCode: '',
+        isOnline: true,
       );
     }
     return null;
