@@ -4,10 +4,10 @@ import 'package:flutterapplication/models/file_attachment.dart';
 
 class Message {
   final int id;
-  final int conversationId;
+  final dynamic conversationId;
   final int senderId;
   final String messageType;
-  final String? content;
+  final String content;
   final bool isAlert;
   final bool isEmergency;
   final DateTime? readAt;
@@ -22,7 +22,7 @@ class Message {
     required this.conversationId,
     required this.senderId,
     required this.messageType,
-    this.content,
+    required this.content,
     required this.isAlert,
     required this.isEmergency,
     this.readAt,

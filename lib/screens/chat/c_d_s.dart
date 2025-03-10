@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:flutterapplication/services/auth_service.dart';
 import 'package:flutterapplication/services/message_service.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import '../../models/message.dart';
 import '../../utils/formatters.dart';
@@ -58,9 +60,9 @@ class _ChatDScreenState extends State<ChatDScreen> {
 
   // Get current user ID (for determining message ownership)
   Future<void> _getCurrentUserId() async {
-    // This would typically come from your auth service
-    // For now, we'll use a placeholder
-    _currentUserId = 1; // Replace with actual implementation
+    // final prefs = await SharedPreferences.getInstance();
+    final user = await AuthService().getCurrentUser();
+    _currentUserId = user!.id;
   }
 
   void _scrollListener() {
@@ -187,7 +189,6 @@ class _ChatDScreenState extends State<ChatDScreen> {
       id: DateTime.now().millisecondsSinceEpoch, // Temporary ID
       conversationId: widget.chatId,
       senderId: _currentUserId ?? 0,
-      // senderName: "You",
       content: messageText,
       createdAt: DateTime.now(),
       readAt: null,
@@ -195,7 +196,7 @@ class _ChatDScreenState extends State<ChatDScreen> {
       messageType: 'text',
       isAlert: false,
       isEmergency: false,
-      updatedAt: DateTime.timestamp(),
+      updatedAt: DateTime.now(),
       status: [],
     );
 
@@ -204,8 +205,11 @@ class _ChatDScreenState extends State<ChatDScreen> {
     });
 
     try {
-      final sentMessage = await _messageService.sendMessage(
+      final sentMessage = await _messageService.pasteMessages(
         widget.chatId,
+        'text',
+        false,
+        false,
         messageText,
       );
 
@@ -224,6 +228,9 @@ class _ChatDScreenState extends State<ChatDScreen> {
 
           if (index != -1) {
             _messages[index] = sentMessage;
+          } else {
+            // If we couldn't find the optimistic message, just add the new one
+            _messages.insert(0, sentMessage);
           }
         });
       } else {
@@ -355,57 +362,6 @@ class _ChatDScreenState extends State<ChatDScreen> {
                     ),
           ),
 
-          // Tag/category indicator
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Colors.grey.shade200)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      const Text(
-                        "# General",
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.keyboard_arrow_up,
-                        size: 16,
-                        color: Colors.blue.shade400,
-                      ),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(
-                    Icons.more_vert,
-                    color: Colors.black54,
-                    size: 18,
-                  ),
-                  onPressed: () {},
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-          ),
-
           // Message input
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -413,7 +369,7 @@ class _ChatDScreenState extends State<ChatDScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.shade100,
                   spreadRadius: 1,
                   blurRadius: 1,
                 ),
@@ -513,24 +469,24 @@ class _ChatDScreenState extends State<ChatDScreen> {
                   ),
                 ],
               ),
-              // child: Column(
-              //   crossAxisAlignment: CrossAxisAlignment.start,
-              //   children: [
-              //     Text(
-              //       message.content,
-              //       style: TextStyle(
-              //         color: isMe ? Colors.white : Colors.black87,
-              //         fontSize: 14,
-              //       ),
-              //     ),
-              //     if (message.files.isNotEmpty) ...[
-              //       const SizedBox(height: 8),
-              //       _buildImageGrid(
-              //         message.files.map((file) => file.url).toList(),
-              //       ),
-              //     ],
-              //   ],
-              // ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message.content,
+                    style: TextStyle(
+                      color: isMe ? Colors.white : Colors.black87,
+                      fontSize: 14,
+                    ),
+                  ),
+                  if (message.files.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    _buildImageGrid(
+                      message.files.map((file) => file.filePath).toList(),
+                    ),
+                  ],
+                ],
+              ),
             ),
             const SizedBox(height: 4),
             Row(

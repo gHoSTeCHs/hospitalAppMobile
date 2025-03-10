@@ -43,6 +43,27 @@ class MessageService {
     }
   }
 
+  Future<Message?> sendMessage(
+    int conversationId,
+    String content, {
+    List<String>? filePaths,
+  }) async {
+    try {
+      Map<String, dynamic> body = {'content': content};
+
+      final response = await _dio.post('/messages/$conversationId', data: body);
+
+      if (response.statusCode == 201) {
+        final data = json.decode(response.data);
+        return Message.fromJson(data['message']);
+      }
+      return null;
+    } catch (e) {
+      print('Error sending message: $e');
+      return null;
+    }
+  }
+
   Future<List<Message>> gM(
     int conversationId, {
     int limit = 50,
@@ -68,24 +89,32 @@ class MessageService {
     }
   }
 
-  Future<Message?> sendMessage(
+  Future pasteMessages(
     int conversationId,
-    String content, {
-    List<String>? filePaths,
-  }) async {
-    try {
-      Map<String, dynamic> body = {'content': content};
+    String type,
+    bool isAlert,
+    bool isEmergency,
+    dynamic content,
+  ) async {
+    await _setAuthHeaders();
 
-      final response = await _dio.post('/messages/$conversationId', data: body);
+    try {
+      final response = await _dio.post(
+        '/messages/$conversationId',
+        data: {
+          'message_type': type,
+          "is_alert": isAlert,
+          "is_emergency": isEmergency,
+          "content": content,
+        },
+      );
 
       if (response.statusCode == 201) {
-        final data = json.decode(response.data);
-        return Message.fromJson(data['message']);
+        return Message.fromJson(response.data['message']);
       }
       return null;
     } catch (e) {
-      print('Error sending message: $e');
-      return null;
+      return e;
     }
   }
 }
