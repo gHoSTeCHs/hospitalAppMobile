@@ -22,19 +22,31 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['user']['id'],
-      name: json['user']['name'],
-      email: json['user']['email'],
-      token: json['token'],
-      hospitalCode: '',
-      profilePicture: json['profile_picture'],
-      isOnline: json['is_online'] ?? false,
-      lastActive:
-          json['last_active'] != null
-              ? DateTime.parse(json['last_active'])
-              : null,
-    );
+    if (json.containsKey('user')) {
+      final userJson = json['user'];
+      return User(
+        id: userJson['id'],
+        name: userJson['name'],
+        email: userJson['email'],
+        token: json['token'],
+        hospitalCode: '',
+        profilePicture: userJson['profile_picture'],
+        isOnline: userJson['is_online'] ?? false,
+        lastActive:
+            userJson['last_active'] != null
+                ? DateTime.parse(userJson['last_active'])
+                : null,
+      );
+    } else {
+      return User(
+        id: json['id'],
+        name: json['name'],
+        email: json['email'],
+        token: '',
+        hospitalCode: '',
+        isOnline: json['is_online'] ?? false,
+      );
+    }
   }
   Map<String, dynamic> toJson() {
     return {

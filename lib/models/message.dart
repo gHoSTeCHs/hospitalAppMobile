@@ -1,7 +1,6 @@
 import 'package:flutterapplication/models/message_status.dart';
-
-import 'user.dart';
-import 'file_attachment.dart';
+import 'package:flutterapplication/models/user.dart';
+import 'package:flutterapplication/models/file_attachment.dart';
 
 class Message {
   final int id;
@@ -13,9 +12,10 @@ class Message {
   final bool isEmergency;
   final DateTime? readAt;
   final DateTime createdAt;
+  final DateTime updatedAt;
   final User? sender;
-  final List<FileAttachment>? files;
-  final List<MessageStatus>? status;
+  final List<FileAttachment> files;
+  final List<MessageStatus> status;
 
   Message({
     required this.id,
@@ -23,13 +23,14 @@ class Message {
     required this.senderId,
     required this.messageType,
     this.content,
-    this.isAlert = false,
-    this.isEmergency = false,
+    required this.isAlert,
+    required this.isEmergency,
     this.readAt,
     required this.createdAt,
+    required this.updatedAt,
     this.sender,
-    this.files,
-    this.status,
+    required this.files,
+    required this.status,
   });
 
   factory Message.fromJson(Map<String, dynamic> json) {
@@ -43,19 +44,20 @@ class Message {
       isEmergency: json['is_emergency'] ?? false,
       readAt: json['read_at'] != null ? DateTime.parse(json['read_at']) : null,
       createdAt: DateTime.parse(json['created_at']),
+      updatedAt: DateTime.parse(json['updated_at']),
       sender: json['sender'] != null ? User.fromJson(json['sender']) : null,
       files:
           json['files'] != null
               ? (json['files'] as List)
                   .map((file) => FileAttachment.fromJson(file))
                   .toList()
-              : null,
+              : [],
       status:
           json['status'] != null
               ? (json['status'] as List)
                   .map((status) => MessageStatus.fromJson(status))
                   .toList()
-              : null,
+              : [],
     );
   }
 
@@ -70,9 +72,10 @@ class Message {
       'is_emergency': isEmergency,
       'read_at': readAt?.toIso8601String(),
       'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
       'sender': sender?.toJson(),
-      'files': files?.map((file) => file.toJson()).toList(),
-      'status': status?.map((status) => status.toJson()).toList(),
+      'files': files.map((file) => file.toJson()).toList(),
+      'status': status.map((status) => status.toJson()).toList(),
     };
   }
 
