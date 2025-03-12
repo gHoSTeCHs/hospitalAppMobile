@@ -91,11 +91,12 @@ class MessageService {
   }
 
   Future pasteMessages(
+    String? type,
     int conversationId,
-    String type,
+    List<File>? files,
+    dynamic content,
     bool isAlert,
     bool isEmergency,
-    dynamic content,
   ) async {
     await _setAuthHeaders();
 
@@ -120,6 +121,7 @@ class MessageService {
   }
 
   Future sendFilesWithMessage(
+    String type,
     int conversationId,
     List<File> files,
     String content,
@@ -127,7 +129,21 @@ class MessageService {
     bool isEmergency,
   ) async {
     await _setAuthHeaders();
-    try {} catch (e) {
+    try {
+      final response = await _dio.post(
+        '/messages/$conversationId',
+        data: {
+          'message_type': type,
+          "file": files,
+          "is_alert": isAlert,
+          "is_emergency": isEmergency,
+          "content": content,
+        },
+      );
+      if (response.statusCode == 201) {
+        return Message.fromJson(response.data['message']);
+      }
+    } catch (e) {
       return e;
     }
   }

@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutterapplication/models/message_file.dart';
 import 'package:flutterapplication/services/auth_service.dart';
 import 'package:flutterapplication/services/message_service.dart';
+import 'package:flutterapplication/utils/boxstyling.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 import '../../models/message.dart';
 import '../../utils/formatters.dart';
@@ -384,11 +387,12 @@ class _ChatDScreenState extends State<ChatDScreen> {
 
     try {
       final sentMessage = await _messageService.pasteMessages(
-        widget.chatId,
         'text',
+        widget.chatId,
+        [],
+        messageText,
         wasAlert,
         wasEmergency,
-        messageText,
       );
 
       if (sentMessage != null) {
@@ -428,9 +432,30 @@ class _ChatDScreenState extends State<ChatDScreen> {
     }
   }
 
+  Future<void> _requestPermissions() async {
+    // For Android 13+ (API level 33+)
+    if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt >= 33) {
+        await [
+          Permission.photos,
+          Permission.videos,
+          Permission.audio,
+        ].request();
+      } else {
+        await Permission.storage.request();
+      }
+    }
+
+    // For iOS
+    if (Platform.isIOS) {
+      await Permission.photos.request();
+    }
+  }
+
   Future<void> _sendMessageWithFiles() async {
     if (_selectedFiles.isEmpty) return;
-
+    await _requestPermissions();
     // Show loading indicator
     setState(() {
       _isUploadingFile = true;
@@ -475,7 +500,7 @@ class _ChatDScreenState extends State<ChatDScreen> {
       createdAt: DateTime.now(),
       readAt: null,
       files: tempFiles,
-      messageType: _selectedFiles.length == 1 ? 'file' : 'files',
+      messageType: _selectedFiles.length == 1 ? 'file' : 'file',
       isAlert: wasAlert,
       isEmergency: wasEmergency,
       updatedAt: DateTime.now(),
@@ -487,18 +512,16 @@ class _ChatDScreenState extends State<ChatDScreen> {
     });
 
     try {
-      // Send files to server (you'll need to implement this in your MessageService)
-      final sentMessage = await _messageService.sendFilesWithMessage(
+      final sentMessage = await _messageService.pasteMessages(
+        'file',
         widget.chatId,
-        _selectedFiles
-            .toList(), // Create a copy as we'll clear the original list
+        _selectedFiles.toList(),
         messageText,
         wasAlert,
         wasEmergency,
       );
 
       if (sentMessage != null) {
-        // Replace optimistic message with the actual one
         setState(() {
           final index = _messages.indexWhere(
             (m) => m.id == optimisticMessage.id,
@@ -507,15 +530,12 @@ class _ChatDScreenState extends State<ChatDScreen> {
           if (index != -1) {
             _messages[index] = sentMessage;
           } else {
-            // If we couldn't find the optimistic message, just add the new one
             _messages.insert(0, sentMessage);
           }
 
-          // Clear selected files
           _selectedFiles.clear();
         });
       } else {
-        // Handle error - remove optimistic message
         setState(() {
           _messages.removeWhere((m) => m.id == optimisticMessage.id);
           _showErrorSnackbar('Failed to send files');
@@ -523,7 +543,7 @@ class _ChatDScreenState extends State<ChatDScreen> {
       }
     } catch (e) {
       print('Error sending files: $e');
-      // Handle error - remove optimistic message
+
       setState(() {
         _messages.removeWhere((m) => m.id == optimisticMessage.id);
       });
@@ -962,12 +982,12 @@ class _ChatDScreenState extends State<ChatDScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _getMessageBackgroundColor(message, isMe),
+                color: Styling.getMessageBackgroundColor(message, isMe),
                 borderRadius: BorderRadius.circular(16),
-                border: _getMessageBorder(message),
+                border: Styling.getMessageBorder(message),
                 boxShadow: [
                   BoxShadow(
-                    color: _getMessageShadowColor(message, isMe),
+                    color: Styling.getMessageShadowColor(message, isMe),
                     spreadRadius: message.isEmergency ? 2 : 1,
                     blurRadius: message.isEmergency ? 3 : 1,
                   ),
@@ -994,7 +1014,9 @@ class _ChatDScreenState extends State<ChatDScreen> {
                           Icon(
                             message.files.length > 1
                                 ? Icons.folder
-                                : _getFileIcon(message.files.first.mimeType),
+                                : Styling.getFileIcon(
+                                  message.files.first.mimeType,
+                                ),
                             size: 12,
                             color: Colors.black54,
                           ),
@@ -1002,7 +1024,7 @@ class _ChatDScreenState extends State<ChatDScreen> {
                           Text(
                             message.files.length > 1
                                 ? '${message.files.length} Files'
-                                : _getFileTypeLabel(
+                                : Styling.getFileTypeLabel(
                                   message.files.first.mimeType,
                                 ),
                             style: const TextStyle(
@@ -1033,7 +1055,7 @@ class _ChatDScreenState extends State<ChatDScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    _getFileIcon(file.mimeType),
+                                    Styling.getFileIcon(file.mimeType),
                                     color: Colors.blue,
                                   ),
                                   const SizedBox(width: 8),
@@ -1052,7 +1074,9 @@ class _ChatDScreenState extends State<ChatDScreen> {
                                           ),
                                         ),
                                         Text(
-                                          DateFormatter.formatFileSize(file.fileSize),
+                                          DateFormatter.formatFileSize(
+                                            file.fileSize,
+                                          ),
                                           style: TextStyle(
                                             fontSize: 10,
                                             color: Colors.grey.shade600,
@@ -1111,72 +1135,5 @@ class _ChatDScreenState extends State<ChatDScreen> {
         ),
       ),
     );
-  }
-
-  // Helper methods for message styling
-  Color _getMessageBackgroundColor(Message message, bool isMe) {
-    if (message.isEmergency) {
-      return isMe ? Colors.red.shade400 : Colors.red.shade50;
-    } else if (message.isAlert) {
-      return isMe ? Colors.amber.shade500 : Colors.amber.shade50;
-    } else {
-      return isMe ? Colors.blue.shade600 : Colors.grey.shade100;
-    }
-  }
-
-  Border? _getMessageBorder(Message message) {
-    if (message.isEmergency) {
-      return Border.all(color: Colors.red.shade300);
-    } else if (message.isAlert) {
-      return Border.all(color: Colors.amber.shade300);
-    } else {
-      return null;
-    }
-  }
-
-  Color _getMessageShadowColor(Message message, bool isMe) {
-    if (message.isEmergency) {
-      return Colors.red.withOpacity(0.3);
-    } else if (message.isAlert) {
-      return Colors.amber.withOpacity(0.3);
-    } else {
-      return Colors.black.withOpacity(0.05);
-    }
-  }
-
-  IconData _getFileIcon(String mimeType) {
-    if (mimeType.startsWith('image/')) {
-      return Icons.image;
-    } else if (mimeType.startsWith('video/')) {
-      return Icons.videocam;
-    } else if (mimeType.startsWith('audio/')) {
-      return Icons.audiotrack;
-    } else if (mimeType == 'application/pdf') {
-      return Icons.picture_as_pdf;
-    } else if (mimeType.contains('word') || mimeType.contains('msword')) {
-      return Icons.description;
-    } else if (mimeType.contains('excel') || mimeType.contains('sheet')) {
-      return Icons.table_chart;
-    } else {
-      return Icons.insert_drive_file;
-    }
-  }
-
-  String _getFileTypeLabel(String mimeType) {
-    if (mimeType.startsWith('image/')) {
-      return 'Image';
-    } else if (mimeType.startsWith('video/')) {
-      return 'Video';
-    } else if (mimeType.startsWith('audio/')) {
-      return 'Audio';
-    } else if (mimeType == 'application/pdf') {
-      return 'PDF';
-    } else if (mimeType.contains('word') || mimeType.contains('msword')) {
-      return 'Document';
-    } else if (mimeType.contains('excel') || mimeType.contains('sheet')) {
-      return 'Spreadsheet';
-    } else {
-      return 'File';
-    }
   }
 }

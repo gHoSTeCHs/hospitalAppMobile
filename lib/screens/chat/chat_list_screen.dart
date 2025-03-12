@@ -50,7 +50,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder:
-            (_) => ChatDetailsScreen(
+            (_) => ChatDScreen(
               chatId: chat.id,
               name: chat.name,
               avatarUrl: chat.avatarUrl,
