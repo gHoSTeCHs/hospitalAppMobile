@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutterapplication/services/auth_service.dart';
@@ -39,6 +42,7 @@ class _ChatDScreenState extends State<ChatDScreen> {
   bool _hasMoreMessages = true;
   Timer? _refreshTimer;
   int? _currentUserId;
+  File? _selectedFile;
 
   @override
   void initState() {
@@ -46,10 +50,8 @@ class _ChatDScreenState extends State<ChatDScreen> {
     _getCurrentUserId();
     _fetchMessages();
 
-    // Add scroll listener for pagination
     _scrollController.addListener(_scrollListener);
 
-    // Set up periodic refresh for new messages
     if (AppConfig.enablePushNotifications) {
       _refreshTimer = Timer.periodic(
         Duration(milliseconds: AppConfig.messageRefreshInterval),
@@ -165,6 +167,16 @@ class _ChatDScreenState extends State<ChatDScreen> {
       });
 
       _showErrorSnackbar('Failed to load more messages');
+    }
+  }
+
+  Future<void> _pickFile() async {
+    final result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      setState(() {
+        _selectedFile = File(result.files.single.path!);
+      });
     }
   }
 
@@ -396,7 +408,7 @@ class _ChatDScreenState extends State<ChatDScreen> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.attach_file, color: Colors.grey),
-                  onPressed: () {},
+                  onPressed: _pickFile,
                 ),
                 FloatingActionButton(
                   onPressed: _sendMessage,

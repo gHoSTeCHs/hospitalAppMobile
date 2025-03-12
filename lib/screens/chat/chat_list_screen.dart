@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutterapplication/screens/chat/c_d_s.dart';
+// import 'package:flutterapplication/screens/chat/c_d_s.dart';
+import 'package:flutterapplication/screens/chat/chat_details_screen.dart';
 import '../../models/chat.dart';
 import '../../services/chat_service.dart'; // ChatService for API calls
 // import 'chat_details_screen.dart';
@@ -49,7 +50,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder:
-            (_) => ChatDScreen(
+            (_) => ChatDetailsScreen(
               chatId: chat.id,
               name: chat.name,
               avatarUrl: chat.avatarUrl,

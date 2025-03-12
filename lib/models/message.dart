@@ -1,6 +1,6 @@
+import 'package:flutterapplication/models/message_file.dart';
 import 'package:flutterapplication/models/message_status.dart';
 import 'package:flutterapplication/models/user.dart';
-import 'package:flutterapplication/models/file_attachment.dart';
 
 class Message {
   final int id;
@@ -14,7 +14,7 @@ class Message {
   final DateTime createdAt;
   final DateTime updatedAt;
   final User? sender;
-  final List<FileAttachment> files;
+  final List<MessageFile> files;
   final List<MessageStatus> status;
 
   Message({
@@ -49,7 +49,7 @@ class Message {
       files:
           json['files'] != null
               ? (json['files'] as List)
-                  .map((file) => FileAttachment.fromJson(file))
+                  .map((file) => MessageFile.fromJson(file))
                   .toList()
               : [],
       status:

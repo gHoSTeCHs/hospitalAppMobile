@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutterapplication/models/message.dart';
@@ -114,6 +115,19 @@ class MessageService {
       }
       return null;
     } catch (e) {
+      return e;
+    }
+  }
+
+  Future sendFilesWithMessage(
+    int conversationId,
+    List<File> files,
+    String content,
+    bool isAlert,
+    bool isEmergency,
+  ) async {
+    await _setAuthHeaders();
+    try {} catch (e) {
       return e;
     }
   }
